@@ -65,7 +65,7 @@ module Nodes
         if n.op == "%" return x % y end
         if n.op == "&" return x & y end
         if n.op == "|" return x | y end
-        if n.op == "^" return x ⊻ y end
+        if n.op == "^" return xor(x, y) end
         if n.op == "==" return int(x == y) end
         if n.op == "<=" return int(x <= y) end
         if n.op == ">=" return int(x >= y) end
