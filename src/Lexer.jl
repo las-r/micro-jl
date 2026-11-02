@@ -35,6 +35,13 @@ module Lexer
         end
         return t.tokens[idx]
     end
+    function expect!(t::Tokens, val)
+        tok = peek(t)
+        if tok != val
+            error("Expected $(val), got $(tok)")
+        end
+        eat!(tokens)
+    end
 
     # tokenizer
     function tokenize(code)
