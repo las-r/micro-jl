@@ -107,6 +107,24 @@ module Parser
             return Nodes.If(cond, body, ebody)
         end
 
+        # while
+        if peek(tokens) == "while"
+            eat!(tokens)
+            cond = parseexpr(tokens)
+            body = Nodes.Node[]
+            while can_eat(tokens) && peek(tokens) != "end"
+                push!(body, parsestmt(tokens))
+            end
+            expect!(tokens, "end")
+            return Nodes.While(cond, body)
+        end
+
+        # break
+        if peek(tokens) == "break"
+            eat!(tokens)
+            return Nodes.Break()
+        end
+
         # assign
         left = parseexpr(tokens)
         if peek(tokens) == "="
