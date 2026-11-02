@@ -11,6 +11,31 @@ module Parser
 
     # atom parser
     function parseatom(tokens::Tokens)
+        # array literals
+        if peek(tokens) == "["
+            eat!(tokens)
+            items = Nodes.Node[]
+            if peek(tokens) != "]"
+                push!(items, parseexpr(tokens))
+                while peek(tokens) == ","
+                    eat!(tokens)
+                    push!(items, parseexpr(tokens))
+                end
+            end
+            if peek(tokens) == "]"
+                eat!(tokens)
+            else
+                error("Expecting closing ']'")
+            end
+            node =  Nodes.Array(items)
+            while peek(tokens) == ":"
+                eat!(tokens)
+                iexpr = parseatom(tokens)
+                node = Nodes.Index(node, iexpr)
+            end
+            return node
+        end
+
         # unary ops
         if peek(tokens) in UNOPS
             op = eat!(tokens)
@@ -23,27 +48,37 @@ module Parser
             eat!(tokens)
             expr = parseexpr(tokens)
             if eat!(tokens) != ")"
-                error("Expected ')'")
+                error("Expected closing ')'")
             end
-            return expr
+            node = expr
+            while peek(tokens) == ":"
+                eat!(tokens)
+                iexpr = parseatom(tokens)
+                node = Nodes.Index(node, iexpr)
+            end
+            return node
         end
 
         # literal
         tok = eat!(tokens)
         if startswith(tok, '"') && endswith(tok, '"')
-            return Nodes.Literal(chop(tok, head=1, tail=1))
-        end
-        val = tryparse(Int, tok)
-        if val !== nothing
-            return Nodes.Literal(val)
-        end
-        val = tryparse(Float64, tok)
-        if val !== nothing
-            return Nodes.Literal(val)
+            node = Nodes.Literal(chop(tok, head=1, tail=1))
+        elseif (val = tryparse(Int, tok)) !== nothing
+            node = Nodes.Literal(val)
+        elseif (val = tryparse(Float64, tok)) !== nothing
+            node = Nodes.Literal(val)
+        else
+            node = Nodes.Variable(tok)
         end
 
-        # variable
-        return Nodes.Variable(tok)
+        # array indexing
+        while peek(tokens) == ":"
+            eat!(tokens)
+            iexpr = parseatom(tokens)
+            node = Nodes.Index(node, iexpr)
+        end
+
+        return node
     end
 
     # expression parser
@@ -66,6 +101,8 @@ module Parser
             right = parseexpr(tokens)
             if left isa Nodes.Variable
                 return Nodes.Assign(left.name, right)
+            elseif left isa Nodes.Index
+                return Nodes.IndexAssign(left.arr, left.idx, right)
             end
             error("Invalid assignment target")
         end

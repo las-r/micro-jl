@@ -73,4 +73,34 @@ module Nodes
         if n.op == ">" return int(x > y) end
         error("Unknown binary operator: $(n.op)") 
     end
+
+    # array nodes
+    struct Array <: Node
+        items::Vector{Node}
+    end
+    function evaluate(n::Array, env)
+        return Any[evaluate(i, env) for i in n.items]
+    end
+
+    struct Index <: Node
+        arr::Node
+        idx::Node
+    end
+    function evaluate(n::Index, env)
+        arr = evaluate(n.arr, env)
+        idx = evaluate(n.idx, env)
+        return arr[idx + 1]
+    end
+
+    struct IndexAssign <: Node
+        arr::Node
+        idx::Node
+        val::Node
+    end
+    function evaluate(n::IndexAssign, env)
+        arr = evaluate(n.arr, env)
+        idx = evaluate(n.idx, env)
+        val = evaluate(n.val, env)
+        arr[idx + 1] = val
+    end
 end
