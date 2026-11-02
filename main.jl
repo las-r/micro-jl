@@ -13,4 +13,15 @@ function main()
     code = read(file, String)
 
     tokens = Micro.Lexer.tokenize(code)
+    ast = Micro.Parser.parseprog(tokens)
+
+    env = Dict()
+    for n in ast
+        Micro.Nodes.evaluate(n, env)
+    end
+
+    println(env)
+    return 0
 end
+
+exit(main())
