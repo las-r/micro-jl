@@ -1,5 +1,5 @@
-module Micro 
+module Micro
+    include("Nodes.jl")
     include("Lexer.jl")
     include("Parser.jl")
-    include("Nodes.jl")
 end
