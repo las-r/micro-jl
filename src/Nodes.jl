@@ -124,12 +124,12 @@ module Nodes
 
     struct While <: Node
         cond::Node
-        body::Vector{Nodes}
+        body::Vector{Node}
     end
     function evaluate(n::While, env)
         try
             while evaluate(n.cond, env) != 0
-                for o in self.body
+                for o in n.body
                     evaluate(o, env)
                 end
             end
@@ -142,6 +142,6 @@ module Nodes
 
     struct Break <: Node end
     function evaluate(n::Break, env)
-        throw(BreakE)
+        throw(BreakE())
     end
 end
