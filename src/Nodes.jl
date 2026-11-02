@@ -3,8 +3,8 @@
 
 module Nodes
     # exceptions
-    struct Break <: Exception end
-    struct Return <: Exception
+    struct BreakE <: Exception end
+    struct ReturnE <: Exception
         value
     end
 
@@ -102,5 +102,46 @@ module Nodes
         idx = evaluate(n.idx, env)
         val = evaluate(n.val, env)
         arr[idx + 1] = val
+    end
+
+    # control flow nodes
+    struct If <: Node
+        cond::Node
+        body::Vector{Node}
+        ebody::Vector{Node}
+    end
+    function evaluate(n::If, env) 
+        if evaluate(n.cond, env) != 0
+            for o in n.body
+                eval(o, env)
+            end
+        else
+            for o in n.ebody
+                eval(o, env)
+            end
+        end
+    end
+
+    struct While <: Node
+        cond::Node
+        body::Vector{Nodes}
+    end
+    function evaluate(n::While, env)
+        try
+            while evaluate(n.cond, env) != 0
+                for o in self.body
+                    evaluate(o, env)
+                end
+            end
+        catch e
+            if !(e isa BreakE)
+                rethrow(e)
+            end
+        end
+    end
+
+    struct Break <: Node end
+    function evaluate(n::Break, env)
+        throw(BreakE)
     end
 end
