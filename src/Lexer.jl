@@ -8,7 +8,7 @@ module Lexer
         (?<NUMBER>   \d+(?:\.\d+)?) |
         (?<STRING>   "(?:\\.|[^"\\])*") |
         (?<KEYWORD>  \b(end|if|else|while|func|break|return|import)\b) |
-        (?<OPER>     ==|<=|>=|&&|\|\||[+\-*/%<>~&^()!:=,\[\]]) |
+        (?<OPER>     ==|<=|>=|&&|\|\||[+\-*/%<>~&\|^()!:=,\[\]]) |
         (?<IDENT>    [a-zA-Z_]\w*) |
         (?<SKIP>     [ \t\r\n]+) |
         (?<MISMATCH> .)
