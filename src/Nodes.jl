@@ -9,7 +9,7 @@ module Nodes
     end
 
     # node parent
-    struct Node end
+    abstract type Node end
 
     # literal node
     struct Literal <: Node
