@@ -66,11 +66,11 @@ module Nodes
         if n.op == "&" return x & y end
         if n.op == "|" return x | y end
         if n.op == "^" return xor(x, y) end
-        if n.op == "==" return int(x == y) end
-        if n.op == "<=" return int(x <= y) end
-        if n.op == ">=" return int(x >= y) end
-        if n.op == "<" return int(x < y) end
-        if n.op == ">" return int(x > y) end
+        if n.op == "==" return Int(x == y) end
+        if n.op == "<=" return Int(x <= y) end
+        if n.op == ">=" return Int(x >= y) end
+        if n.op == "<" return Int(x < y) end
+        if n.op == ">" return Int(x > y) end
         error("Unknown binary operator: $(n.op)") 
     end
 
@@ -113,11 +113,11 @@ module Nodes
     function evaluate(n::If, env) 
         if evaluate(n.cond, env) != 0
             for o in n.body
-                eval(o, env)
+                evaluate(o, env)
             end
         else
             for o in n.ebody
-                eval(o, env)
+                evaluate(o, env)
             end
         end
     end
