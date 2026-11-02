@@ -2,7 +2,7 @@
 # by las-r
 
 module Parser
-    using ..Lexer: Tokens, tokenize, peek, eat!, can_eat
+    using ..Lexer: Tokens, tokenize, peek, eat!, can_eat, expect!
     using ..Nodes
 
     # operator lists
@@ -22,11 +22,7 @@ module Parser
                     push!(items, parseexpr(tokens))
                 end
             end
-            if peek(tokens) == "]"
-                eat!(tokens)
-            else
-                error("Expecting closing ']'")
-            end
+            expect!(tokens, "]")
             node =  Nodes.Array(items)
             while peek(tokens) == ":"
                 eat!(tokens)
@@ -47,9 +43,7 @@ module Parser
         if peek(tokens) == "("
             eat!(tokens)
             expr = parseexpr(tokens)
-            if eat!(tokens) != ")"
-                error("Expected closing ')'")
-            end
+            expect!(tokens, ")")
             node = expr
             while peek(tokens) == ":"
                 eat!(tokens)
@@ -94,7 +88,26 @@ module Parser
 
     # statement parser
     function parsestmt(tokens)
-        # assignment
+        # if
+        if peek(tokens) == "if"
+            eat!(tokens)
+            cond = parseexpr(tokens)
+            body = Nodes.Node[]
+            while can_eat(tokens) && peek(tokens) != "else" && peek(tokens) != "end"
+                push!(body, parsestmt(tokens))
+            end
+            ebody = Nodes.Node[]
+            if peek(tokens) == "else" 
+                eat!(tokens)
+                while can_eat(tokens) && peek(tokens) != "end"
+                    push!(ebody, parsestmt(tokens))
+                end
+            end
+            expect!(tokens, "end")
+            return Nodes.If(cond, body, ebody)
+        end
+
+        # assign
         left = parseexpr(tokens)
         if peek(tokens) == "="
             eat!(tokens)
