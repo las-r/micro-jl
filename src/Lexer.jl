@@ -40,7 +40,7 @@ module Lexer
         if tok != val
             error("Expected $(val), got $(tok)")
         end
-        eat!(tokens)
+        eat!(t)
     end
 
     # tokenizer
