@@ -8,15 +8,15 @@ module Nodes
         value
     end
 
+    # node parent
+    abstract type Node end
+
     # function
     struct Func
         params::Vector{String}
         body::Vector{Node}
         env::Dict
     end
-
-    # node parent
-    abstract type Node end
 
     # literal node
     struct Literal <: Node
@@ -161,7 +161,7 @@ module Nodes
         params::Vector{String}
         body::Vector{Node}
     end
-    function evaluate(n::Function, env)
+    function evaluate(n::Define, env)
         env[n.name] = Func(n.params, n.body, env)
     end
 
@@ -185,7 +185,7 @@ module Nodes
             lenv = merge(func.env, Dict(p => copy(v) for (p, v) in zip(func.params, eargs)))
             try
                 for o in func.body
-                    eval(o, lenv)
+                    evaluate(o, lenv)
                 end
             catch e
                 if e isa ReturnE
@@ -202,6 +202,6 @@ module Nodes
         value
     end
     function evaluate(n::Return, env)
-        throw(Return(n.value ? evaluate(n.value, env) : nothing))
+        throw(ReturnE(n.value === nothing ? nothing : evaluate(n.value, env)))
     end
 end
