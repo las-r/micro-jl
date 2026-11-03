@@ -57,7 +57,7 @@ module Parser
         tok = eat!(tokens)
         if startswith(tok, '"') && endswith(tok, '"')
             node = Nodes.Literal(chop(tok, head=1, tail=1))
-        elseif (val = tryparse(Int, tok)) !== nothing
+        elseif (val = tryparse(BigInt, tok)) !== nothing
             node = Nodes.Literal(val)
         elseif (val = tryparse(Float64, tok)) !== nothing
             node = Nodes.Literal(val)
