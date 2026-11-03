@@ -2,7 +2,7 @@
 # by las-r
 
 module Parser
-    using ..Lexer: Tokens, tokenize, peek, eat!, can_eat, expect!
+    using ..Lexer: Tokens, peek, eat!, can_eat, expect!
     using ..Nodes
 
     # operator lists
