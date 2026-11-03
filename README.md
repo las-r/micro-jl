@@ -8,6 +8,7 @@ Prerequisites: Julia, `PackageCompiler.jl`
 
 ```sh
 git clone https://github.com/las-r/micro-jl.git
-cd micro-jl\Micro
+Rename-Item -Path "micro-jl" -NewName "Micro"
+cd Micro
 julia .\build.jl
 ```
