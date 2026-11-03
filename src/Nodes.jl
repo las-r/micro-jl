@@ -156,7 +156,7 @@ module Nodes
     end
 
     # function nodes
-    struct Function <: Node
+    struct Define <: Node
         name::String
         params::Vector{String}
         body::Vector{Node}
