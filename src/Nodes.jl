@@ -8,6 +8,13 @@ module Nodes
         value
     end
 
+    # function
+    struct Func
+        params::Vector{String}
+        body::Vector{Node}
+        env::Dict
+    end
+
     # node parent
     abstract type Node end
 
@@ -24,7 +31,10 @@ module Nodes
         name::String
     end
     function evaluate(n::Variable, env)
-        return env[n.name]
+        if n.name in keys(env)
+            return env[n.name]
+        end
+        error("Undefined variable: '$(n.name)'")
     end
 
     struct Assign <: Node
@@ -45,7 +55,7 @@ module Nodes
         if n.op == "-" return -x end
         if n.op == "~" return ~x end
         if n.op == "!" return Int(!x) end
-        error("Unknown unary operator: $(n.op)") 
+        error("Unknown unary operator: '$(n.op)'") 
     end
 
     struct BinaryOp <: Node
@@ -71,7 +81,7 @@ module Nodes
         if n.op == ">=" return Int(x >= y) end
         if n.op == "<" return Int(x < y) end
         if n.op == ">" return Int(x > y) end
-        error("Unknown binary operator: $(n.op)") 
+        error("Unknown binary operator: '$(n.op)'") 
     end
 
     # array nodes
@@ -143,5 +153,55 @@ module Nodes
     struct Break <: Node end
     function evaluate(n::Break, env)
         throw(BreakE())
+    end
+
+    # function nodes
+    struct Function <: Node
+        name::String
+        params::Vector{String}
+        body::Vector{Node}
+    end
+    function evaluate(n::Function, env)
+        env[n.name] = Func(n.params, n.body, env)
+    end
+
+    struct Call <: Node
+        name::String
+        args::Vector{Node}
+    end
+    function evaluate(n::Call, env)
+        if !(n.name in keys(env))
+            error("Undefined function: '$(n.name)'")
+        end
+        func::Func = env[n.name]
+        copy(v) = v isa Vector ? deepcopy(v) : v
+        eargs = [evaluate(a, env) for a in n.args]
+        if !isempty(methods(func))
+            return func([copy(a) for a in eargs]...)
+        elseif func isa Func
+            if length(n.args) != length(func.params)
+                error("Argument mismatch for '$(n.name)'")
+            end
+            lenv = merge(func.env, Dict(p => copy(v) for (p, v) in zip(func.params, eargs)))
+            try
+                for o in func.body
+                    eval(o, lenv)
+                end
+            catch e
+                if e isa ReturnE
+                    return e.value
+                else
+                    rethrow(e)
+                end
+            end
+        end
+        error("'$(n.name)' is not a callable function")
+    end
+
+    struct Return <: Node
+        value
+    end
+    function evaluate(n::Return, env)
+        throw(Return(n.value ? evaluate(n.value, env) : nothing))
     end
 end
