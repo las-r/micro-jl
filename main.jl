@@ -65,4 +65,11 @@ function main()
     return 0
 end
 
-exit(main())
+function julia_main()::Cint
+    try
+        return main()
+    catch e
+        showerror(stderr, e, catch_backtrace())
+        return 1
+    end
+end

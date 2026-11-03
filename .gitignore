@@ -33,3 +33,5 @@ JuliaLocalPreferences.toml
 
 # Micro
 *.mic
+build/
+build/*
