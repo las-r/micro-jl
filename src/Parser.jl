@@ -53,7 +53,7 @@ module Parser
             return node
         end
 
-        # literal
+        # literal, function call, and variable
         tok = eat!(tokens)
         if startswith(tok, '"') && endswith(tok, '"')
             node = Nodes.Literal(chop(tok, head=1, tail=1))
@@ -61,6 +61,18 @@ module Parser
             node = Nodes.Literal(val)
         elseif (val = tryparse(Float64, tok)) !== nothing
             node = Nodes.Literal(val)
+        elseif peek(tokens) == "("
+            eat!(tokens)
+            args = Nodes.Node[]
+            if peek(tokens) != ")"
+                push!(args, parseexpr(tokens))
+                while peek(tokens) == ","
+                    eat!(tokens)
+                    push!(args, parseexpr(tokens))
+                end
+            end
+            expect!(tokens, ")")
+            node = Nodes.Call(tok, args)
         else
             node = Nodes.Variable(tok)
         end
@@ -123,6 +135,41 @@ module Parser
         if peek(tokens) == "break"
             eat!(tokens)
             return Nodes.Break()
+        end
+
+        # function
+        if peek(tokens) == "func"
+            eat!(tokens)
+            name = eat!(tokens)
+            params = String[]
+            if peek(tokens) == "("
+                eat!(tokens)
+                if peek(tokens) != ")"
+                    push!(params, eat!(tokens))
+                    while peek(tokens) == ","
+                        eat!(tokens)
+                        push!(params, eat!(tokens))
+                    end
+                end
+                expect!(tokens, ")")
+            end
+            body = Nodes.Node[]
+            while can_eat(tokens) && peek(tokens) != "end"
+                push!(body, parsestmt(tokens))
+            end
+            expect!(tokens, "end")
+            return Nodes.Define(name, params, body)
+        end
+
+        # return
+        if peek(tokens) == "return"
+            eat!(tokens)
+            if can_eat(tokens) && !(peek(tokens) in ["end", "if", "else", "while", "break", "func", "return", "import"])
+                value = parseexpr(tokens)
+            else
+                value = nothing
+            end
+            return Nodes.Return(value)
         end
 
         # assign
