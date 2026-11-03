@@ -173,7 +173,7 @@ module Nodes
         if !(n.name in keys(env))
             error("Undefined function: '$(n.name)'")
         end
-        func::Func = env[n.name]
+        func = env[n.name]
         copy(v) = v isa Vector ? deepcopy(v) : v
         eargs = [evaluate(a, env) for a in n.args]
         if !isempty(methods(func))
