@@ -54,7 +54,7 @@ module Nodes
         x = evaluate(n.x, env)
         if n.op == "-" return -x end
         if n.op == "~" return ~x end
-        if n.op == "!" return Int(!x) end
+        if n.op == "!" return Int(x == 0) end
         error("Unknown unary operator: '$(n.op)'") 
     end
 
@@ -65,8 +65,8 @@ module Nodes
     end
     function evaluate(n::BinaryOp, env)
         x = evaluate(n.x, env)
-        if n.op == "&&" return Int(x && evaluate(n.y, env)) end
-        if n.op == "||" return Int(x || evaluate(n.y, env)) end
+        if n.op == "&&" return Int(x != 0 && evaluate(n.y, env) != 0) end
+        if n.op == "||" return Int(x != 0 || evaluate(n.y, env) != 0) end
         y = evaluate(n.y, env)
         if n.op == "+" return x + y end
         if n.op == "-" return x - y end

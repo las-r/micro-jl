@@ -1,4 +1,5 @@
 name = "Micro"
 uuid = "4e667e03-391b-4e80-b5d9-d1c81ba9f603"
-authors = ["las-r <128936184+las-r@users.noreply.github.com>"]
-version = "0.1.0"
+version = "0.1.1"
+
+[deps]
